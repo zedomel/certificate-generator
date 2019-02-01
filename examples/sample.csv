@@ -1,0 +1,4 @@
+firstName,eventName,startDate,endDate,participant_email
+Mike,"My Great Event" ,01/01/2019,05/01/2019,mike@example.com
+John,"My Great Event" ,01/01/2019,05/01/2019,john@example.com
+Alice,"My Great Event" ,01/01/2019,05/01/2019,alice@example.com
