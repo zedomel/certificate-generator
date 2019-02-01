@@ -2,7 +2,7 @@
 
 require_once 'vendor/autoload.php';
 require 'inc/config.php';
-require 'inc/certPDF.php';
+require 'inc/certDompdf.php';
 require 'inc/certMailer.php';
 
 /*
@@ -24,20 +24,6 @@ ini_set('memory_limit', MEMORY_LIMIT);
 setlocale(LC_ALL, LOCALE);
 date_default_timezone_set('Etc/UTC');
 
-// p: page size ex: A4, (299,400)
-// i: html input file
-// c: not used
-// y: y offset
-// d: data file CSV
-// e:
-// s:
-// m:
-// r:
-// a:
-// h:
-// o: output file/directory
-// f: font file
-
 $def_options = [
     ['i', 'input', \GetOpt\GetOpt::REQUIRED_ARGUMENT, 'HTML template file'],
     ['o', 'output', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'PDF output file/directory', 'output.pdf'],
@@ -50,7 +36,7 @@ $def_options = [
     ['r', 'replyto', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Reply to email', 'example@certificategenerator.com'],
     ['a', 'attach', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Additional attachment'],
     ['?', 'help', \GetOpt\GetOpt::NO_ARGUMENT, 'Show this help and quit'],
-    ['f', 'font', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Add font to TCPDF', ''],
+    ['f', 'font', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Add font to TCPDF'],
 ];
 $getopt = new \GetOpt\GetOpt($def_options);
 try {
@@ -72,9 +58,7 @@ if ($getopt->getOption('help')) {
     echo $getopt->getHelpText();
     exit;
 }
-
 $options = $getopt->getOptions();
-print_r($options);
 
 if (isset($options['f'])) {
     $font_file = $options['f'];
@@ -90,17 +74,13 @@ if (isset($options['f'])) {
 // }
 
 // Background image
-$img_file = '';
-if (isset($options['i'])) {
-    $img_file = realpath($options['i']);
-}
-
-if (!isset($options['c'])) {
-    exit;
-}
+// $img_file = '';
+// if (isset($options['i'])) {
+    // $img_file = realpath($options['i']);
+// }
 
 // Text
-$input_html = file_get_contents($options['c']);
+$input_html = file_get_contents($options['i']);
 
 // Page size
 $size = 'A4';
@@ -172,7 +152,6 @@ if (!empty($data_file)) {
     if (false !== ($handle = fopen($data_file, 'r'))) {
         $csv_header = fgetcsv($handle, 1000, DELIMITER);
         $send_by_email = in_array($email_col_name, $csv_header);
-
         $i = 0;
         $mailer = new CertMailer();
         while (false !== ($data = fgetcsv($handle, 1000, DELIMITER))) {
@@ -185,14 +164,19 @@ if (!empty($data_file)) {
 
                 $output_file = isset($row[$email_col_name]) ? $output.DIRECTORY_SEPARATOR.strtolower(trim($row[$email_col_name])).'.pdf' : $output.DIRECTORY_SEPARATOR.$i.'pdf';
                 // create new PDF document
-                $pdf = new CERTIFICATEPDF('L', 'cm', $size, true, 'UTF-8', false, false);
+                $pdf = new CERTIFICATEDOMPDF('landscape', 'cm', $size, true, 'UTF-8', false, false);
                 $pdf->create_pdf($output_file, $input_html, $y_offset, $row);
                 unset($pdf);
                 if ($send_by_email && file_exists($output_file)) {
                     $email_to = $row[$email_col_name];
-                    $mailer->send_mail($email_to, $email_subject, $email_message, $email_from, $email_from_name, $output_file, $attchments);
+                    $email_body = $email_message;
+                    foreach ($row as $key => $value) {
+                        $email_body = preg_replace('/\{\{\s*'.$key.'\s*\}\}/', trim($value), $email_body);
+                    }
+                    $email_body = str_replace('{{ %now% }}', date('d \d\e F \d\e Y'), $email_body);
+
+                    $mailer->send_mail($email_to, $email_subject, $email_body, $email_from, $email_from_name, $output_file, $attchments);
                 }
-                //echo $output_file."\n";
                 ++$i;
             }
         }

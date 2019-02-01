@@ -41,12 +41,12 @@ define('SMTP_SECURE', 'tls');
 /*
  * Mail Authentication Username
  */
-define('MAIL_USERNAME', 'joseasalim@gmail.com');
+define('MAIL_USERNAME', 'youname@gmail.com');
 
 /*
  * Mail Authentication Password
  */
-define('MAIL_PASSWORD', '!Zeit@1234');
+define('MAIL_PASSWORD', 'password123');
 
 /*
  * Use HTML Content
@@ -66,7 +66,7 @@ define('MEMORY_LIMIT', '512M');
 /*
  * LOCALE
  */
-define('LOCALE', 'pt_BR');
+define('LOCALE', 'en_US');
 
 /*
  * CSV Delimiter

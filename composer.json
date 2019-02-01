@@ -1,7 +1,7 @@
 {
     "require": {
         "phpmailer/phpmailer": "~6.0",
-        "tecnickcom/tcpdf": "6.2.26",
-        "ulrichsg/getopt-php": "^3.0"
+        "ulrichsg/getopt-php": "^3.0",
+        "dompdf/dompdf": "^0.8.3"
     }
 }
