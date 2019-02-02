@@ -3,7 +3,7 @@
 /**
  * Default PDF font.
  */
-define('DEFAULT_FONT', 'ubuntulight');
+define('DEFAULT_FONT', 'helvetica');
 
 /*
  * Default font size
@@ -41,7 +41,7 @@ define('SMTP_SECURE', 'tls');
 /*
  * Mail Authentication Username
  */
-define('MAIL_USERNAME', 'youname@gmail.com');
+define('MAIL_USERNAME', 'example@gmail.com');
 
 /*
  * Mail Authentication Password
@@ -69,12 +69,11 @@ define('MEMORY_LIMIT', '512M');
 define('LOCALE', 'en_US');
 
 /*
+ * Date format (strftime)
+ */
+define('DATE_FORMAT', '%B, %d of %Y');
+
+/*
  * CSV Delimiter
  */
 define('DELIMITER', ',');
-
-/*
- * PDF margins
- */
-define('MARGIN_LEFT', 40);
-define('MARGIN_RIGHT', 40);

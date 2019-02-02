@@ -32,7 +32,7 @@ class CERTIFICATEDOMPDF extends Dompdf
         $this->setPaper($format, $orientation);
     }
 
-    public function create_pdf($output = 'output.pdf', $html = '', $y_offset = 0, $data = '', $df = 'd \d\e F \d\e Y')
+    public function create_pdf($output = 'output.pdf', $html = '', $y_offset = 0, $data = '', $df = '%B, %d of %Y')
     {
         // Handle content text if needed
         if (!empty($data)) {
@@ -41,7 +41,7 @@ class CERTIFICATEDOMPDF extends Dompdf
             }
         }
 
-        $html = str_replace('{{ %now% }}', date($df), $html);
+        $html = str_replace('{{ %now% }}', strftime($df), $html);
         $this->loadHtml($html);
         $this->render();
         $pdf_gen = $this->output();

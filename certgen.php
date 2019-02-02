@@ -5,21 +5,6 @@ require 'inc/config.php';
 require 'inc/certDompdf.php';
 require 'inc/certMailer.php';
 
-/*
- * Options:
- * c: certificate content (file or string)
- * i: background image
- * o: output (file or directory)
- * y: offset y position of content text
- * d: data file (CSV)
- * p: page size (defaulf: A4)
- * e: e-mail index column in data file
- * m: e-mail message
- * r: reply-to/from e-mail
- * s: e-mail subject
- * a: list of attchament
- */
-
 ini_set('memory_limit', MEMORY_LIMIT);
 setlocale(LC_ALL, LOCALE);
 date_default_timezone_set('Etc/UTC');
@@ -33,7 +18,7 @@ $def_options = [
     ['e', 'email_col', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Email column name in CSV file', 'email'],
     ['s', 'subject', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Email subject', 'Certificate'],
     ['m', 'message', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Email message or a path to file with message', 'Here is your certificate'],
-    ['r', 'replyto', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Reply to email', 'example@certificategenerator.com'],
+    ['r', 'replyto', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Reply to email'],
     ['a', 'attach', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Additional attachment'],
     ['?', 'help', \GetOpt\GetOpt::NO_ARGUMENT, 'Show this help and quit'],
     ['f', 'font', \GetOpt\GetOpt::OPTIONAL_ARGUMENT, 'Add font to TCPDF'],
@@ -123,7 +108,14 @@ if (isset($options['s'])) {
     $email_subject = $options['s'];
 }
 
-$email_message = isset($options['m']) ? file_get_contents($options['m']) : 'Here is your certificate';
+if (isset($options['m'])) {
+    if (is_file($options['m'])) {
+        $email_message = file_get_contents($options['m']);
+    } else {
+        $email_message = $options['m'];
+    }
+}
+
 if (isset($options['r'])) {
     if (preg_match('/(.*);(.*@.*)/', $options['r'], $matches)) {
         $email_from_name = $matches[1];
@@ -133,8 +125,8 @@ if (isset($options['r'])) {
         $email_from_name = $email_from;
     }
 } else {
-    $email_from = 'example@certificategenerator.com';
-    $email_from_name = $email_from;
+    $email_from = MAIL_USERNAME;
+    $email_from_name = MAIL_USERNAME;
 }
 
 // Get any email attchament
@@ -165,7 +157,7 @@ if (!empty($data_file)) {
                 $output_file = isset($row[$email_col_name]) ? $output.DIRECTORY_SEPARATOR.strtolower(trim($row[$email_col_name])).'.pdf' : $output.DIRECTORY_SEPARATOR.$i.'pdf';
                 // create new PDF document
                 $pdf = new CERTIFICATEDOMPDF('landscape', 'cm', $size, true, 'UTF-8', false, false);
-                $pdf->create_pdf($output_file, $input_html, $y_offset, $row);
+                $pdf->create_pdf($output_file, $input_html, $y_offset, $row, DATE_FORMAT);
                 unset($pdf);
                 if ($send_by_email && file_exists($output_file)) {
                     $email_to = $row[$email_col_name];
@@ -173,7 +165,7 @@ if (!empty($data_file)) {
                     foreach ($row as $key => $value) {
                         $email_body = preg_replace('/\{\{\s*'.$key.'\s*\}\}/', trim($value), $email_body);
                     }
-                    $email_body = str_replace('{{ %now% }}', date('d \d\e F \d\e Y'), $email_body);
+                    $email_body = str_replace('{{ %now% }}', strftime(DATE_FORMAT), $email_body);
 
                     $mailer->send_mail($email_to, $email_subject, $email_body, $email_from, $email_from_name, $output_file, $attchments);
                 }
@@ -185,5 +177,5 @@ if (!empty($data_file)) {
     }
 } else {
     $pdf = new CERTIFICATEPDF('L', 'cm', $size, true, 'UTF-8', false, false);
-    $pdf->create_pdf($output_file, $input_html, $y_offset);
+    $pdf->create_pdf($output_file, $input_html, $y_offset, DATE_FORMAT);
 }
