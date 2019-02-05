@@ -52,7 +52,7 @@ class CertMailer
     public function send_mail($to, $subject, $message, $from, $from_name = '', $attachment = '', $other_attachments = [])
     {
         $this->_mailer->setFrom($from, $from_name);
-        $this->_mailer->addReplyTo($from, $from_name);
+        // $this->_mailer->addReplyTo($from, $from_name);
         $this->_mailer->addAddress($to, '');
         $this->_mailer->Subject = $subject;
         $this->_mailer->Body = $message;

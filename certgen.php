@@ -150,7 +150,7 @@ if (!empty($data_file)) {
             if (count($data) > 0) {
                 $row = [];
                 foreach ($data as $key => $value) {
-                    $row[$csv_header[$key]] = preg_replace('/\x{FEFF}/u', '', $value);
+                    $row[trim($csv_header[$key])] = preg_replace('/\x{FEFF}/u', '', $value);
                 }
                 print_r($row);
 
